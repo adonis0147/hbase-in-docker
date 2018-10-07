@@ -22,6 +22,8 @@ apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install --yes \
   sudo tzdata openssh-server vim openjdk-8-jdk openjdk-8-jre curl
 
+apt-get autoclean && apt-get clean
+
 # set timezone
 ln -snf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 dpkg-reconfigure --frontend noninteractive tzdata

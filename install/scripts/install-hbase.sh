@@ -12,6 +12,7 @@ chown -R hadoop:hadoop /home/hadoop/hbase*
 
 sudo -u hadoop mkdir -p /data/conf/hbase
 sudo -u hadoop mv /home/hadoop/hbase-current/conf /data/conf/hbase/
+sudo -u hadoop cp /data/conf/hadoop/hdfs-site.xml /data/conf/hbase/conf/
 
 JAVA_HOME='/usr/lib/jvm/java-1.8.0-openjdk-amd64'
 HBASE_LOG_DIR='/home/hadoop/cluster_data/hbase/logs'
