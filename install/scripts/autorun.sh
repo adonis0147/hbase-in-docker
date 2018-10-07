@@ -1,4 +1,3 @@
-#!/bin/sh
+#!/bin/bash
 
 service ssh start
-
