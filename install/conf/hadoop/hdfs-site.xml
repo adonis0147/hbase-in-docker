@@ -30,12 +30,8 @@
 		<value>qjournal://hbase-cluster-n1.com:8485;hbase-cluster-n2.com:8485;hbase-cluster-n3.com:8485/hbase-cluster</value>
 	</property>
 	<property>
-		<name>dfs.client.failover.proxy.provider.mycluster</name>
+		<name>dfs.client.failover.proxy.provider.hbase-cluster</name>
 		<value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
-	</property>
-	<property>
-		<name>fs.defaultFS</name>
-		<value>hdfs://hbase-cluster</value>
 	</property>
 	<property>
 		<name>dfs.journalnode.edits.dir</name>
