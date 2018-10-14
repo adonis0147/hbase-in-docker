@@ -18,10 +18,18 @@ deb http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted univ
 deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted universe multiverse" > /etc/apt/sources.list
 
 # install prerequisites
-apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install --yes \
-  sudo tzdata openssh-server vim openjdk-8-jdk openjdk-8-jre curl
+prerequisites=(
+systemd
+sudo
+tzdata
+openssh-server
+vim
+openjdk-8-jdk
+openjdk-8-jre
+)
 
+apt-get update
+DEBIAN_FRONTEND=noninteractive apt-get install --yes "${prerequisites[@]}"
 apt-get autoclean && apt-get clean
 
 # set timezone
@@ -38,3 +46,12 @@ if [[ -f "${HOME}/.bashrc" ]]; then
   . "${HOME}/.bashrc"
 fi
 ' > /home/hadoop/.bash_profile
+
+# setup ssh-key
+mv /root/install/ssh /home/hadoop/.ssh
+cp /home/hadoop/.ssh/id_rsa.pub /home/hadoop/.ssh/authorized_keys
+chmod 0600 /home/hadoop/.ssh/authorized_keys
+chown -R hadoop:hadoop /home/hadoop/.ssh
+
+# start services
+systemctl enable ssh

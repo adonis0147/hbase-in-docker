@@ -9,38 +9,52 @@ if ! docker network ls | grep hadoop > /dev/null; then
     hadoop
 fi
 
-docker run -itd \
-  --network=hadoop \
-  --hostname=hbase-cluster-n1.com \
-  --name=hbase-cluster-n1 \
-  --mount=source=home1,target=/home/hadoop \
-  --mount=source=disk1,target=/data \
-  --ip=172.18.0.2 \
-  --add-host=hbase-cluster-n1.com:172.18.0.2 \
-  --add-host=hbase-cluster-n2.com:172.18.0.3 \
-  --add-host=hbase-cluster-n3.com:172.18.0.4 \
-  hbase-in-docker
+function start_container() {
+  local id="${1}"
+  local add_hosts=(${2})
+  local ip="$(get_ip "${id}")"
+  local hostname="$(get_hostname "${id}")"
+  local name="${hostname%.com}"
+  local home_path="home${id}"
+  local disk_path="disk${id}"
 
-docker run -itd \
-  --network=hadoop \
-  --hostname=hbase-cluster-n2.com \
-  --name=hbase-cluster-n2 \
-  --mount=source=home2,target=/home/hadoop \
-  --mount=source=disk2,target=/data \
-  --ip=172.18.0.3 \
-  --add-host=hbase-cluster-n1.com:172.18.0.2 \
-  --add-host=hbase-cluster-n2.com:172.18.0.3 \
-  --add-host=hbase-cluster-n3.com:172.18.0.4 \
-  hbase-in-docker
+  docker run -itd \
+    --mount type=bind,source=/sys/fs/cgroup,target=/sys/fs/cgroup,readonly \
+    --mount type=tmpfs,destination=/run \
+    --mount type=tmpfs,destination=/run/lock \
+    --mount source="${home_path}",target=/home/hadoop \
+    --mount source="${disk_path}",target=/data \
+    --name "${name}" \
+    --hostname "${hostname}" \
+    --network hadoop \
+    --ip "${ip}" \
+    "${add_hosts[@]}" hbase-in-docker
+}
 
-docker run -itd \
-  --network=hadoop \
-  --hostname=hbase-cluster-n3.com \
-  --name=hbase-cluster-n3 \
-  --mount=source=home3,target=/home/hadoop \
-  --mount=source=disk3,target=/data \
-  --ip=172.18.0.4 \
-  --add-host=hbase-cluster-n1.com:172.18.0.2 \
-  --add-host=hbase-cluster-n2.com:172.18.0.3 \
-  --add-host=hbase-cluster-n3.com:172.18.0.4 \
-  hbase-in-docker
+function start_cluster() {
+  local num="${1}"
+  local add_hosts=''
+  for i in $(seq 1 "${num}"); do
+    local ip="$(get_ip ${i})"
+    add_hosts="${add_hosts}--add-host $(get_hostname ${i}):${ip} "
+  done
+
+  for i in $(seq 1 "${num}"); do
+    start_container "${i}" "${add_hosts}"
+  done
+}
+
+function get_ip() {
+  local id="${1}"
+  local gateway=$(docker network inspect hadoop | grep -P -o '(?<="Gateway": ")(.*)(?=")')
+  local prefix="${gateway%.*}"
+  local suffix="${gateway##*.}"
+  echo "${prefix}.$((suffix + i))"
+}
+
+function get_hostname() {
+  local id="${1}"
+  echo "hbase-cluster-n${id}.com"
+}
+
+start_cluster 3

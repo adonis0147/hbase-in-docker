@@ -20,4 +20,4 @@ fi
 mkdir -p "${SSHKEY_PATH}"
 yes | ssh-keygen -t rsa -N '' -f "${SSHKEY_PATH}/id_rsa"
 
-docker build -t hbase-in-docker ./install
+docker build -t hbase-in-docker .
