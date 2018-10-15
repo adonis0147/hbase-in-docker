@@ -5,16 +5,20 @@ INSTALL_PATH="${HOME}/install"
 ARCHIVES_PATH="${INSTALL_PATH}/archives"
 SSHKEY_PATH="${INSTALL_PATH}/ssh"
 
-if [[ ! -f "${ARCHIVES_PATH}/hadoop-2.9.1.tar.gz" ]]; then
+hadoop_package='hadoop-2.9.1.tar.gz'
+hadoop_package_url='https://mirrors.aliyun.com/apache/hadoop/common/hadoop-2.9.1/hadoop-2.9.1.tar.gz'
+
+hbase_package='hbase-1.4.7-bin.tar.gz'
+hbase_package_url='https://mirrors.aliyun.com/apache/hbase/1.4.7/hbase-1.4.7-bin.tar.gz'
+
+if [[ ! -f "${ARCHIVES_PATH}/${hadoop_package}" ]]; then
   echo 'download hadoop'
-  curl -fLo "${ARCHIVES_PATH}/hadoop-2.9.1.tar.gz" --create-dirs \
-    https://mirrors.aliyun.com/apache/hadoop/common/hadoop-2.9.1/hadoop-2.9.1.tar.gz
+  curl -fLo "${ARCHIVES_PATH}/${hadoop_package}" --create-dirs "${hadoop_package_url}"
 fi
 
-if [[ ! -f "${ARCHIVES_PATH}/hbase-1.4.7-bin.tar.gz" ]]; then
+if [[ ! -f "${ARCHIVES_PATH}/${hbase_package}" ]]; then
   echo 'download hbase'
-  curl -fLo "${ARCHIVES_PATH}/hbase-1.4.7-bin.tar.gz" --create-dirs \
-    https://mirrors.aliyun.com/apache/hbase/1.4.7/hbase-1.4.7-bin.tar.gz
+  curl -fLo "${ARCHIVES_PATH}/${hbase_package}" --create-dirs "${hbase_package_url}"
 fi
 
 mkdir -p "${SSHKEY_PATH}"
