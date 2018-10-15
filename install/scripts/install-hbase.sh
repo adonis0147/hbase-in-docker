@@ -8,6 +8,7 @@ ln -snf "${hbase_path}" "${HOME}/hbase-current"
 
 hbase_conf_path="${HOME}/hbase-current/conf"
 cp /root/install/conf/hbase/conf/* /home/hadoop/hbase-current/conf/
+
 chown -R hadoop:hadoop "${HOME}"/hbase-*
 
 sudo -u hadoop mkdir -p /data/conf/hbase
@@ -27,5 +28,5 @@ sudo -u hadoop sed -i "${commands}" /data/conf/hbase/conf/hbase-env.sh
 sudo -u hadoop ln -snf /data/conf/hbase/conf "${hbase_conf_path}"
 
 # setup environment
-hbase_path="/home/hadoop/hbase-current/bin"
-sudo -u hadoop echo 'export PATH="'"${hbase_path}"':${PATH}"' >> /home/hadoop/.bash_profile
+hbase_bin_path="/home/hadoop/hbase-current/bin"
+sudo -u hadoop echo 'export PATH="'"${hbase_bin_path}"':${PATH}"' >> /home/hadoop/.bash_profile

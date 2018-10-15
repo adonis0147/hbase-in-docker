@@ -30,5 +30,5 @@ sudo -u hadoop sed -i "${commands}" /data/conf/hadoop/hadoop-env.sh
 sudo -u hadoop ln -snf /data/conf/hadoop "${hadoop_conf_path}"
 
 # setup environment
-hadoop_path="/home/hadoop/hadoop-current/bin:/home/hadoop/hadoop-current/sbin"
-sudo -u hadoop echo 'export PATH="'"${hadoop_path}"':${PATH}"' >> /home/hadoop/.bash_profile
+hadoop_bin_path="/home/hadoop/hadoop-current/bin:/home/hadoop/hadoop-current/sbin"
+sudo -u hadoop echo 'export PATH="'"${hadoop_bin_path}"':${PATH}"' >> /home/hadoop/.bash_profile
