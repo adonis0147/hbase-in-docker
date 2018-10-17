@@ -19,13 +19,13 @@ deb-src http://mirrors.aliyun.com/ubuntu/ ${codename}-backports main restricted 
 
 # install prerequisites
 prerequisites=(
-systemd
-sudo
-tzdata
-openssh-server
-vim
-openjdk-8-jdk
-openjdk-8-jre
+  systemd
+  sudo
+  tzdata
+  openssh-server
+  vim
+  openjdk-8-jdk
+  openjdk-8-jre
 )
 
 apt-get update
