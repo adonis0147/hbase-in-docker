@@ -9,8 +9,7 @@ ln -snf "${hadoop_path}" "${HOME}/hadoop-current"
 hadoop_conf_path="${HOME}/hadoop-current/etc/hadoop"
 cp /root/install/conf/hadoop/* "${hadoop_conf_path}/"
 
-mkdir -p /home/hadoop/setup
-mv /root/install/scripts/setup-hadoop.sh "${HOME}/setup/"
+mv /root/install/scripts/setup "${HOME}/"
 
 chown -R hadoop:hadoop "${HOME}"/hadoop-* "${HOME}/setup"
 

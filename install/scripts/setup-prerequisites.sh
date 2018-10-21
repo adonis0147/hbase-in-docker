@@ -54,4 +54,11 @@ chmod 0600 /home/hadoop/.ssh/authorized_keys
 chown -R hadoop:hadoop /home/hadoop/.ssh
 
 # start services
+echo '
+[Install]
+WantedBy=multi-user.target
+Alias=rc-local.service
+' >> /lib/systemd/system/rc-local.service
+systemctl enable rc-local
+
 systemctl enable ssh
