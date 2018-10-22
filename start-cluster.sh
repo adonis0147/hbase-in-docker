@@ -35,8 +35,8 @@ function start_cluster() {
   local num="${1}"
   local add_hosts=''
   for i in $(seq 1 "${num}"); do
-    local ip="$(get_ip ${i})"
-    add_hosts="${add_hosts}--add-host $(get_hostname ${i}):${ip} "
+    local ip="$(get_ip "${i}")"
+    add_hosts="${add_hosts}--add-host $(get_hostname "${i}"):${ip} "
   done
 
   for i in $(seq 1 "${num}"); do

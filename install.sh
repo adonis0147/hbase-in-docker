@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOME="$(dirname ${BASH_SOURCE[0]})"
+HOME="$(dirname "${BASH_SOURCE[0]}")"
 INSTALL_PATH="${HOME}/install"
 ARCHIVES_PATH="${INSTALL_PATH}/archives"
 SSHKEY_PATH="${INSTALL_PATH}/ssh"

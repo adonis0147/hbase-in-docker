@@ -3,12 +3,12 @@
 # generate known_hosts
 known_hosts='/home/hadoop/.ssh/known_hosts'
 echo > "${known_hosts}"
-while read host; do
+while read -r host; do
   ssh-keyscan -t rsa -H "${host}" >> "${known_hosts}"
 done < /home/hadoop/hadoop-current/etc/hadoop/slaves
 chmod 0600 "${known_hosts}"
 
-while read host; do
+while read -r host; do
   scp "${known_hosts}" "${host}:~/.ssh/"
 done < /home/hadoop/hadoop-current/etc/hadoop/slaves
 

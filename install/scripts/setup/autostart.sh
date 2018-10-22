@@ -38,7 +38,7 @@ function init() {
 }
 
 function get_master() {
-  echo "$(head -n 1 "${SERVERS}")"
+  head -n 1 "${SERVERS}"
 }
 
 function is_master() {
@@ -59,7 +59,7 @@ function check_all_servers_up() {
   local all_up=true
   for i in {1..300}; do
     all_up=true
-    while read host; do
+    while read -r host; do
       log_info "check ${host} status"
       if ! remote_cmd "${host}" 'exit'; then
         log_warn "${host} is down"
@@ -82,11 +82,11 @@ function copy_known_hosts() {
   log_info 'copy known_hosts to slaves'
   local known_hosts='/home/hadoop/.ssh/known_hosts'
   echo > "${known_hosts}"
-  while read host; do
+  while read -r host; do
     ssh-keyscan -t rsa -H "${host}" >> "${known_hosts}"
   done < "${SERVERS}"
 
-  while read host; do
+  while read -r host; do
     scp "${known_hosts}" "${host}:~/.ssh/"
   done < "${SERVERS}"
 }
@@ -97,7 +97,7 @@ function check_services() {
   local all_up=true
   for i in {1..30}; do
     all_up=true
-    while read host; do
+    while read -r host; do
       log_info "check ${host}'s ${process} status"
       if ! remote_cmd "${host}" 'jps | grep $(< '"${pid_file}"") | grep ${process} > /dev/null"; then
         log_warn "${host}'s ${process} is down"
