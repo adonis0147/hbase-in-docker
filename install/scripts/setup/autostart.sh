@@ -115,7 +115,7 @@ function check_services() {
   return 1
 }
 
-check_services_on_host() {
+function check_services_on_host() {
   local host="${1}"
   local pid_file="${2}"
   local process="${3}"
@@ -180,6 +180,52 @@ function start_datanodes() {
   fi
 }
 
+function check_hdfs() {
+  local nn1="$(sed -n '1p' "${SERVERS}")"
+  local pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-namenode.pid'
+  if ! check_services_on_host "${nn1}" "${pid_file}" 'NameNode'; then
+    log_error "failed to start ${nn1}'s namenode"
+    return 1
+  fi
+
+  pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-datanode.pid'
+  if ! check_services "${pid_file}" 'DataNode'; then
+    log_error "failed to start datanodes"
+    return 1
+  fi
+
+  local nn2="$(sed -n '2p' "${SERVERS}")"
+  pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-namenode.pid'
+  if ! check_services_on_host "${nn2}" "${pid_file}" 'NameNode'; then
+    log_error "failed to start ${nn2}'s namenode"
+    return 1
+  fi
+
+  pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-journalnode.pid'
+  if ! check_services "${pid_file}" 'JournalNode'; then
+    log_error "failed to start journalnodes"
+    return 1
+  fi
+
+  return 0
+}
+
+function set_active_namenode() {
+  local namenode="${1}"
+  for i in {1..30}; do
+    log_info "set ${namenode} active"
+    "${HADOOP_BIN}"/hdfs haadmin -transitionToActive "${namenode}" 1>>"${PROCESS_LOG}" 2>&1
+    local state="$("${HADOOP_BIN}"/hdfs haadmin -getServiceState "${namenode}")"
+    if [[ "${state}" == 'active' ]]; then
+      return 0
+    else
+      log_warn "failed to set ${namenode} active - state: ${state}"
+      sleep 1
+    fi
+  done
+  return 1
+}
+
 function main() {
   init
 
@@ -188,23 +234,31 @@ function main() {
     exit 0
   fi
 
+  if ! check_all_servers_up; then
+    log_error 'some servers are down'
+    exit 1
+  fi
+
   if ls "${INSTALLED_MARK}" > /dev/null 2>&1; then
     log_info 'hadoop was installed'
 
     log_info 'start dfs'
     "${HADOOP_SBIN}"/start-dfs.sh 1>>"${PROCESS_LOG}" 2>&1
 
-    log_info 'set nn1 active'
-    "${HADOOP_BIN}"/hdfs haadmin -transitionToActive nn1 1>>"${PROCESS_LOG}" 2>&1
+    if ! check_hdfs; then
+      log_error 'failed to start hdfs'
+      exit 1
+    fi
+
+    if ! set_active_namenode 'nn1'; then
+      log_error 'failed to set nn1 active'
+      exit 1
+    fi
 
     log_info 'start hbase'
     "${HBASE_BIN}"/start-hbase.sh 1>>"${PROCESS_LOG}" 2>&1
-    exit 0
-  fi
 
-  if ! check_all_servers_up; then
-    log_error 'some servers are down'
-    exit 1
+    exit 0
   fi
 
   copy_known_hosts

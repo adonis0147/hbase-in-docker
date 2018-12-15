@@ -5,11 +5,11 @@ INSTALL_PATH="${HOME}/install"
 ARCHIVES_PATH="${INSTALL_PATH}/archives"
 SSHKEY_PATH="${INSTALL_PATH}/ssh"
 
-hadoop_package='hadoop-2.9.1.tar.gz'
-hadoop_package_url='https://mirrors.aliyun.com/apache/hadoop/common/hadoop-2.9.1/hadoop-2.9.1.tar.gz'
+hadoop_package='hadoop-2.9.2.tar.gz'
+hadoop_package_url='https://mirrors.aliyun.com/apache/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz'
 
-hbase_package='hbase-1.4.7-bin.tar.gz'
-hbase_package_url='https://mirrors.aliyun.com/apache/hbase/1.4.7/hbase-1.4.7-bin.tar.gz'
+hbase_package='hbase-1.4.8-bin.tar.gz'
+hbase_package_url='https://mirrors.aliyun.com/apache/hbase/1.4.8/hbase-1.4.8-bin.tar.gz'
 
 if [[ ! -f "${ARCHIVES_PATH}/${hadoop_package}" ]]; then
   echo 'download hadoop'
