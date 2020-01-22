@@ -9,6 +9,7 @@ INSTALLED_MARK='/data/.hadoop-installed'
 HADOOP_BIN='/home/hadoop/hadoop-current/bin'
 HADOOP_SBIN='/home/hadoop/hadoop-current/sbin'
 HBASE_BIN='/home/hadoop/hbase-current/bin'
+ZOOKEEPER_BIN='/home/hadoop/zookeeper-current/bin'
 
 function log() {
   local level="${1}"
@@ -135,7 +136,7 @@ function start_journalnodes() {
   log_info 'start journalnodes'
   "${HADOOP_SBIN}"/hadoop-daemons.sh start journalnode 1>>"${PROCESS_LOG}" 2>&1
 
-  local pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-journalnode.pid'
+  local pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-journalnode.pid'
   if check_services "${pid_file}" 'JournalNode'; then
     return 0
   else
@@ -150,7 +151,7 @@ function start_namenodes() {
   "${HADOOP_BIN}"/hdfs namenode -format 1>>"${PROCESS_LOG}" 2>&1
   "${HADOOP_SBIN}"/hadoop-daemon.sh start namenode 1>>"${PROCESS_LOG}" 2>&1
 
-  local pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-namenode.pid'
+  local pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-namenode.pid'
   if ! check_services_on_host "${nn1}" "${pid_file}" 'NameNode'; then
     log_error "failed to start ${nn1}'s namenode"
     return 1
@@ -172,7 +173,7 @@ function start_datanodes() {
   log_info 'start datanodes'
   "${HADOOP_SBIN}"/hadoop-daemons.sh start datanode 1>>"${PROCESS_LOG}" 2>&1
 
-  local pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-datanode.pid'
+  local pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-datanode.pid'
   if check_services "${pid_file}" 'DataNode'; then
     return 0
   else
@@ -182,26 +183,26 @@ function start_datanodes() {
 
 function check_hdfs() {
   local nn1="$(sed -n '1p' "${SERVERS}")"
-  local pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-namenode.pid'
+  local pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-namenode.pid'
   if ! check_services_on_host "${nn1}" "${pid_file}" 'NameNode'; then
     log_error "failed to start ${nn1}'s namenode"
     return 1
   fi
 
-  pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-datanode.pid'
+  pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-datanode.pid'
   if ! check_services "${pid_file}" 'DataNode'; then
     log_error "failed to start datanodes"
     return 1
   fi
 
   local nn2="$(sed -n '2p' "${SERVERS}")"
-  pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-namenode.pid'
+  pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-namenode.pid'
   if ! check_services_on_host "${nn2}" "${pid_file}" 'NameNode'; then
     log_error "failed to start ${nn2}'s namenode"
     return 1
   fi
 
-  pid_file='/home/hadoop/cluster-data/pids/hadoop-hadoop-journalnode.pid'
+  pid_file='/home/hadoop/cluster-data/hadoop/pids/hadoop-hadoop-journalnode.pid'
   if ! check_services "${pid_file}" 'JournalNode'; then
     log_error "failed to start journalnodes"
     return 1
@@ -224,6 +225,26 @@ function set_active_namenode() {
     fi
   done
   return 1
+}
+
+function start_zookeeper() {
+  log_info "start zookeeper"
+  local quorum="${1}"
+  local zookeeper_conf_path='/home/hadoop/zookeeper-current/conf/zoo.cfg'
+  local zookeeper_data_path='/home/hadoop/cluster-data/zk/data'
+  local pid_file='/home/hadoop/cluster-data/zk/data/zookeeper_server.pid'
+  for i in $(seq 1 "${quorum}"); do
+    host="$(grep "server.${i}" "${zookeeper_conf_path}" | awk -F = '{print $NF}')"
+    host="${host//:*}"
+    ssh -n "${host}" "mkdir -p ${zookeeper_data_path}"
+    ssh -n "${host}" "echo ${i} > ${zookeeper_data_path}/myid"
+    ssh -n "${host}" "${ZOOKEEPER_BIN}/zkServer.sh start"
+    if ! check_services_on_host "${host}" "${pid_file}" 'QuorumPeerMain'; then
+      log_error "failed to start ${host}'s zookeeper"
+      return 1
+    fi
+  done
+  return 0
 }
 
 function main() {
@@ -255,6 +276,8 @@ function main() {
       exit 1
     fi
 
+    start_zookeeper 3
+
     log_info 'start hbase'
     "${HBASE_BIN}"/start-hbase.sh 1>>"${PROCESS_LOG}" 2>&1
 
@@ -283,6 +306,11 @@ function main() {
 
   log_info 'set installed mark'
   touch "${INSTALLED_MARK}"
+
+  if ! start_zookeeper 3; then
+    log_error 'failed to start zookeeper'
+    exit 1
+  fi
 
   log_info 'start hbase'
   "${HBASE_BIN}"/start-hbase.sh 1>>"${PROCESS_LOG}" 2>&1

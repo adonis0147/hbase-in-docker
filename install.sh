@@ -5,15 +5,23 @@ INSTALL_PATH="${HOME}/install"
 ARCHIVES_PATH="${INSTALL_PATH}/archives"
 SSHKEY_PATH="${INSTALL_PATH}/ssh"
 
-hadoop_package='hadoop-2.9.2.tar.gz'
-hadoop_package_url='https://mirrors.aliyun.com/apache/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz'
+hadoop_package='hadoop-2.10.0.tar.gz'
+hadoop_package_url='http://mirrors.aliyun.com/apache/hadoop/common/hadoop-2.10.0/hadoop-2.10.0.tar.gz'
 
-hbase_package='hbase-1.4.10-bin.tar.gz'
-hbase_package_url='https://mirrors.aliyun.com/apache/hbase/1.4.10/hbase-1.4.10-bin.tar.gz'
+zookeeper_package='apache-zookeeper-3.5.6-bin.tar.gz'
+zookeeper_package_url='https://mirrors.aliyun.com/apache/zookeeper/stable/apache-zookeeper-3.5.6-bin.tar.gz'
+
+hbase_package='hbase-1.4.12-bin.tar.gz'
+hbase_package_url='https://mirrors.aliyun.com/apache/hbase/hbase-1.4.12/hbase-1.4.12-bin.tar.gz'
 
 if [[ ! -f "${ARCHIVES_PATH}/${hadoop_package}" ]]; then
   echo 'download hadoop'
   curl -fLo "${ARCHIVES_PATH}/${hadoop_package}" --create-dirs "${hadoop_package_url}"
+fi
+
+if [[ ! -f "${ARCHIVES_PATH}/${zookeeper_package}" ]]; then
+  echo 'download zookeeper'
+  curl -fLo "${ARCHIVES_PATH}/${zookeeper_package}" --create-dirs "${zookeeper_package_url}"
 fi
 
 if [[ ! -f "${ARCHIVES_PATH}/${hbase_package}" ]]; then

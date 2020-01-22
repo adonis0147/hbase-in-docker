@@ -45,8 +45,7 @@ function start_cluster() {
 }
 
 function get_ip() {
-  local id="${1}"
-  local gateway=$(docker network inspect hadoop | grep -P -o '(?<="Gateway": ")(.*)(?=")')
+  local gateway="172.18.0.1"
   local prefix="${gateway%.*}"
   local suffix="${gateway##*.}"
   echo "${prefix}.$((suffix + i))"
