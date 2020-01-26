@@ -276,7 +276,10 @@ function main() {
       exit 1
     fi
 
-    start_zookeeper 3
+    if ! start_zookeeper 3; then
+      log_error 'failed to start zookeeper'
+      exit 1
+    fi
 
     log_info 'start hbase'
     "${HBASE_BIN}"/start-hbase.sh 1>>"${PROCESS_LOG}" 2>&1
